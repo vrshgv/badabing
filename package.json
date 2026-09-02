@@ -1,0 +1,5 @@
+{
+  "name": "badabing",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}
