@@ -24,7 +24,7 @@ through generated migrations that are read before running.
 Two configs exist on purpose: `app.module.ts` for the running app,
 `src/data-source.ts` for the migration CLI.
 
-Migrations run via tsx, not ts-node, because TypeORM 0.3 loads files with
+Migrations run via tsx, not ts-node, because TypeORM 1.1 loads files with
 dynamic import. tsx uses esbuild, which drops decorator metadata, so every
 `@Column` needs an explicit `type`.
 
