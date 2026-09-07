@@ -38,7 +38,8 @@
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^1.1.1"
+    "typeorm": "^1.1.1",
+    "@badabing/shared": "*"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
