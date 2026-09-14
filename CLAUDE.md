@@ -8,7 +8,7 @@ npm workspaces monorepo.
 
 ```
 apps/api          NestJS + TypeORM + Postgres
-apps/web          React + Vite + TanStack Query + Zustand
+apps/web          React + Vite + TanStack Query + Zustand + Zod
 packages/shared   shared TypeScript types
 ```
 
@@ -82,6 +82,7 @@ unique constraint on the join table, not in application code.
 - REST, DTO validation on every endpoint, consistent error shapes
 - Cursor pagination on list endpoints, not offset
 - Server state in TanStack Query, UI state in Zustand, no overlap
+- Zod validates on the web side, class-validator DTOs on the api side
 
 ## Notes
 

@@ -17,7 +17,7 @@ npm run start:dev -w @badabing/api
 ## Stack
 
 TypeScript throughout. NestJS, TypeORM, Postgres. React, Vite, TanStack
-Query, Zustand. npm workspaces.
+Query, Zustand, Zod. npm workspaces.
 
 ## Decisions
 
