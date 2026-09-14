@@ -1,5 +1,6 @@
 import { Screening } from './screening.entity';
-import { ScreeningResponse } from '@badabing/shared';
+import { Attendance } from '../attendances/attendances.entity';
+import { ScreeningResponse, ScreeningDetail, Attendee } from '@badabing/shared';
 
 export function toScreeningResponse(s: Screening): ScreeningResponse {
   return {
@@ -17,3 +18,18 @@ export function toScreeningResponse(s: Screening): ScreeningResponse {
     createdAt: s.createdAt.toISOString(),
   };
 }
+
+export function toScreeningDetail(screening: Screening, rows: Attendance[]): ScreeningDetail {
+  const toAttendee = (a: Attendance): Attendee => ({
+    userId: a.userId,
+    name: a.user.name,
+    position: a.position,
+  });
+
+  return {
+    ...toScreeningResponse(screening),
+    waitlist: rows.filter(r => r.status === 'waitlisted').map(toAttendee),
+    confirmed: rows.filter(r => r.status === 'confirmed').map(toAttendee),
+    seatsRemaining: Math.max(0, screening.capacity - rows.filter(r => r.status === 'confirmed').length),
+  }
+} 

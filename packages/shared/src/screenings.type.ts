@@ -25,3 +25,10 @@ export interface ScreeningResponse {
   startsAt: string;
   createdAt: string;
 }
+
+export interface Attendee { userId: string; name: string; position: number | null; }
+export interface ScreeningDetail extends ScreeningResponse {
+  seatsRemaining: number;
+  confirmed: Attendee[];
+  waitlist: Attendee[];
+}
