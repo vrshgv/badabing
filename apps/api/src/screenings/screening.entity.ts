@@ -46,7 +46,7 @@ export class Screening {
   cancelledAt: Date | null;
 
   @Index()
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'timestamptz', precision: 3 })
   startsAt: Date;
 
   @CreateDateColumn({ type: 'timestamptz' })

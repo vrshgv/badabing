@@ -1,6 +1,6 @@
 import { Screening } from './screening.entity';
 import { Attendance } from '../attendances/attendances.entity';
-import { ScreeningResponse, ScreeningDetail, Attendee } from '@badabing/shared';
+import { ScreeningResponse, ScreeningDetail, Attendee, ScreeningListItem } from '@badabing/shared';
 
 export function toScreeningResponse(s: Screening): ScreeningResponse {
   return {
@@ -19,7 +19,7 @@ export function toScreeningResponse(s: Screening): ScreeningResponse {
   };
 }
 
-export function toScreeningDetail(screening: Screening, rows: Attendance[]): ScreeningDetail {
+export function toScreeningDetail(screening: Screening, rows: Attendance[], viewerId?: string): ScreeningDetail {
   const toAttendee = (a: Attendance): Attendee => ({
     userId: a.userId,
     name: a.user.name,
@@ -31,5 +31,14 @@ export function toScreeningDetail(screening: Screening, rows: Attendance[]): Scr
     waitlist: rows.filter(r => r.status === 'waitlisted').map(toAttendee),
     confirmed: rows.filter(r => r.status === 'confirmed').map(toAttendee),
     seatsRemaining: Math.max(0, screening.capacity - rows.filter(r => r.status === 'confirmed').length),
+    isAttending: !!viewerId && rows.some(r => r.userId === viewerId),
   }
 } 
+
+export function toScreeningListItem(screening: Screening, confirmedCount: number, isAttending: boolean): ScreeningListItem {
+  return {
+    ...toScreeningResponse(screening),
+    seatsRemaining: Math.max(0, screening.capacity - confirmedCount),
+    isAttending,
+  };
+}

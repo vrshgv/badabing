@@ -27,8 +27,24 @@ export interface ScreeningResponse {
 }
 
 export interface Attendee { userId: string; name: string; position: number | null; }
-export interface ScreeningDetail extends ScreeningResponse {
+
+export interface ListScreeningsQuery {
+  cursor?: string;
+  limit?: number;
+  viewerId?: string;
+}
+
+export interface ScreeningListItem extends ScreeningResponse {
   seatsRemaining: number;
+  isAttending: boolean;
+}
+
+export interface ScreeningDetail extends ScreeningListItem {
   confirmed: Attendee[];
   waitlist: Attendee[];
+}
+
+export interface Page<T> {
+  items: T[];
+  nextCursor: string | null;
 }

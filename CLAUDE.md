@@ -2,6 +2,13 @@
 
 Movie night screenings with limited seats.
 
+## Role
+
+Help and guide only. Do not write code.
+
+Explain, review, point at files, sketch approaches, answer questions. The
+human writes the implementation.
+
 ## Structure
 
 npm workspaces monorepo.

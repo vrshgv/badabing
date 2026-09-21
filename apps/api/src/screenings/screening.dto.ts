@@ -1,4 +1,4 @@
-import { CreateScreeningInput } from '@badabing/shared';
+import { CreateScreeningInput, ListScreeningsQuery } from '@badabing/shared';
 import { IsString, IsNotEmpty, Max, IsInt, Min, IsOptional, IsUrl, IsUUID, IsISO8601, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -47,4 +47,22 @@ export class CreateScreeningDto implements CreateScreeningInput {
 
   @IsISO8601()
   startsAt: string;
+}
+
+export class ListScreeningsQueryDto implements ListScreeningsQuery {
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  cursor?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  @Type(() => Number)
+  limit?: number;
+
+  @IsOptional()
+  @IsUUID()
+  viewerId?: string;
 }
