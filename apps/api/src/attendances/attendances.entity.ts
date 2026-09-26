@@ -10,8 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Screening } from '../screenings/screening.entity';
-
-export type AttendanceStatus = 'confirmed' | 'waitlisted';
+import { AttendanceStatus } from '@badabing/shared';
 
 @Entity('attendances')
 @Unique(['screeningId', 'userId'])

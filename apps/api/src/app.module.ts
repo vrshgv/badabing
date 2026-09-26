@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScreeningsModule } from './screenings/screenings.module';
+import { AttendancesModule } from './attendances/attendances.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
@@ -15,7 +16,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       logging: true,
       extra: { max: 10 }
     }),
-    ScreeningsModule
+    ScreeningsModule,
+    AttendancesModule
   ],
   controllers: [AppController],
   providers: [AppService],
