@@ -30,7 +30,7 @@ export class CreateScreeningDto implements CreateScreeningInput {
 
   @IsOptional()
   @IsInt()
-  @Min(2025)
+  @Min(1888)
   @Max(2100)
   @Type(() => Number)
   year?: number | null;
