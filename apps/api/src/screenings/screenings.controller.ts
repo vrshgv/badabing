@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, ParseUUIDPipe, HttpCode, HttpStatus } from '@nestjs/common';
 import { ScreeningsService } from './screenings.service';
 import { ScreeningResponse, ScreeningDetail, Page, ScreeningListItem } from '@badabing/shared';
-import { CreateScreeningDto, ListScreeningsQueryDto } from './screening.dto';
+import { CreateScreeningDto, ListScreeningsQueryDto, CancelScreeningDto } from './screening.dto';
 @Controller('screenings')
 export class ScreeningsController {
   constructor(
@@ -23,5 +23,14 @@ export class ScreeningsController {
     @Param('id', ParseUUIDPipe) id: string, 
     @Query('viewerId', new ParseUUIDPipe({ optional: true })) viewerId?: string): Promise<ScreeningDetail> {
     return this.screeningsService.findOne(id, viewerId);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  cancel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: CancelScreeningDto
+  ): Promise<void> {
+    return this.screeningsService.cancel(id, query.hostId);
   }
 }

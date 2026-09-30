@@ -1,11 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull, MoreThan } from 'typeorm';
 import { Screening } from './screening.entity';
 import { User } from '../users/user.entity';
 import { Attendance } from '../attendances/attendances.entity';
 import { CreateScreeningDto, ListScreeningsQueryDto } from './screening.dto';
-import { ScreeningResponse, ScreeningDetail, ScreeningListItem, Page } from '@badabing/shared';
+import { ScreeningResponse, ScreeningDetail, ScreeningListItem, Page, ErrorCode } from '@badabing/shared';
 import { toScreeningResponse, toScreeningDetail, toScreeningListItem } from './screenings.mapper';
 
 const DEFAULT_LIMIT = 20;
@@ -18,7 +18,10 @@ function decodeCursor(raw: string): { startsAt: Date; id: string } {
   const [startsAt, id] = Buffer.from(raw, 'base64url').toString().split('|');
   const date = new Date(startsAt);
   if (isNaN(date.getTime()) || !id) {
-    throw new BadRequestException('Invalid cursor');
+    throw new BadRequestException({
+      code: ErrorCode.INVALID_CURSOR,
+      message: 'Invalid cursor',
+    });
   }
   return { startsAt: date, id };
 }
@@ -37,7 +40,10 @@ export class ScreeningsService {
   async create(dto: CreateScreeningDto): Promise<ScreeningResponse> {
     const hostExists = await this.users.existsBy({ id: dto.hostId});
     if (!hostExists) {
-      throw new BadRequestException(`Host with id ${dto.hostId} does not exist`);
+      throw new BadRequestException({
+        code: ErrorCode.HOST_NOT_FOUND,
+        message: `Host with id ${dto.hostId} does not exist`,
+      });
     }
 
     const screening = this.screenings.create({
@@ -115,7 +121,10 @@ export class ScreeningsService {
     const screening = await this.screenings.findOneBy({ id });
 
     if (!screening) {
-      throw new NotFoundException(`Screening with id ${id} does not exist`);
+      throw new NotFoundException({
+        code: ErrorCode.SCREENING_NOT_FOUND,
+        message: `Screening with id ${id} does not exist`,
+      });
     }
 
     const rows = await this.attendances.find({
@@ -125,5 +134,49 @@ export class ScreeningsService {
     });
 
     return toScreeningDetail(screening, rows, viewerId);
+  }
+
+  async cancel(id: string, hostId: string): Promise<void> {
+    const result = await this.screenings.update(
+      {
+        id,
+        hostId,
+        cancelledAt: IsNull(),
+        startsAt: MoreThan(new Date())
+      },
+      { cancelledAt: new Date() }
+    );
+
+    if (result.affected) {
+      return;
+    }
+
+    const screening = await this.screenings.findOneBy({ id });
+
+    if (!screening) {
+      throw new NotFoundException({
+        code: ErrorCode.SCREENING_NOT_FOUND,
+        message: `Screening with id ${id} does not exist`,
+      });
+    }
+
+    if (screening.hostId !== hostId) {
+      throw new ForbiddenException({
+        code: ErrorCode.NOT_HOST,
+        message: `Only the host can cancel screening ${id}`,
+      });
+    }
+
+    if (screening.cancelledAt) {
+      throw new ConflictException({
+        code: ErrorCode.SCREENING_CANCELLED,
+        message: `Screening with id ${id} is already cancelled`,
+      });
+    }
+
+    throw new ConflictException({
+      code: ErrorCode.SCREENING_STARTED,
+      message: `Screening with id ${id} has already started`,
+    });
   }
 }

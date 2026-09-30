@@ -1,4 +1,4 @@
-import { CreateScreeningInput, ListScreeningsQuery } from '@badabing/shared';
+import { CreateScreeningInput, ListScreeningsQuery, CancelScreeningQuery } from '@badabing/shared';
 import { IsString, IsNotEmpty, Max, IsInt, Min, IsOptional, IsUrl, IsUUID, IsISO8601, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -65,4 +65,9 @@ export class ListScreeningsQueryDto implements ListScreeningsQuery {
   @IsOptional()
   @IsUUID()
   viewerId?: string;
+}
+
+export class CancelScreeningDto implements CancelScreeningQuery {
+  @IsUUID()
+  hostId: string;
 }
