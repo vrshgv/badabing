@@ -3,7 +3,7 @@ import { Attendance } from './attendances.entity';
 import { Screening } from '../screenings/screening.entity';
 import { User } from '../users/user.entity';
 import { DataSource, QueryFailedError } from 'typeorm';
-import { AttendanceResponse, AttendanceStatus } from '@badabing/shared';
+import { AttendanceResponse, AttendanceStatus, ErrorCode } from '@badabing/shared';
 import { toAttendanceResponse } from './attendances.mapper';
 
 const PG_UNIQUE_VIOLATION = '23505';
@@ -24,15 +24,24 @@ export class AttendancesService {
           });
 
           if (!screening) {
-            throw new NotFoundException(`Screening with id ${screeningId} not found`);
+            throw new NotFoundException({
+              code: ErrorCode.SCREENING_NOT_FOUND,
+              message: `Screening with id ${screeningId} does not exist`,
+            });
           }
 
           if (screening.cancelledAt) {
-            throw new ConflictException(`Screening with id ${screeningId} is cancelled`);
+            throw new ConflictException({
+              code: ErrorCode.SCREENING_CANCELLED,
+              message: `Screening with id ${screeningId} is cancelled`,
+            });
           }
 
           if (screening.startsAt <= new Date()) {
-            throw new ConflictException(`Screening with id ${screeningId} has already started`);
+            throw new ConflictException({
+              code: ErrorCode.SCREENING_STARTED,
+              message: `Screening with id ${screeningId} has already started`,
+            });
           }
 
           const userExists = await manager.existsBy(User, {
@@ -40,7 +49,10 @@ export class AttendancesService {
           })
 
           if (!userExists) {
-            throw new BadRequestException('User does not exist');
+            throw new BadRequestException({
+              code: ErrorCode.USER_NOT_FOUND,
+              message: `User with id ${userId} does not exist`,
+            });
           }
 
           const confirmedCount = await manager.countBy(Attendance, {
@@ -78,7 +90,10 @@ export class AttendancesService {
     } catch (err) {
       if (err instanceof QueryFailedError
         && (err.driverError as { code?: string }).code === PG_UNIQUE_VIOLATION) {
-        throw new ConflictException(`User ${userId} already claimed a seat`);
+        throw new ConflictException({
+          code: ErrorCode.SEAT_ALREADY_CLAIMED,
+          message: `User ${userId} already claimed a seat on screening ${screeningId}`,
+        });
       }
       throw err;
     }
@@ -93,7 +108,10 @@ export class AttendancesService {
         })
 
         if (!screening) {
-          throw new NotFoundException(`Screening with id ${screeningId} not found`);
+          throw new NotFoundException({
+            code: ErrorCode.SCREENING_NOT_FOUND,
+            message: `Screening with id ${screeningId} does not exist`,
+          });
         }
 
         const attendance = await manager.findOne(Attendance, {
@@ -101,7 +119,10 @@ export class AttendancesService {
         })
 
         if (!attendance) {
-          throw new NotFoundException(`Attendance not found`);
+          throw new NotFoundException({
+            code: ErrorCode.ATTENDANCE_NOT_FOUND,
+            message: `User ${userId} has no seat on screening ${screeningId}`,
+          });
         }
 
         const wasConfirmed = attendance.status === 'confirmed';
