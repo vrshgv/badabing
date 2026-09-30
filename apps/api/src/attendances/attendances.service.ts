@@ -83,4 +83,60 @@ export class AttendancesService {
       throw err;
     }
   }
+
+  async cancel(screeningId: string, userId: string): Promise<void> {
+    await this.dataSource.transaction(
+      async (manager) => {
+        const screening = await manager.findOne(Screening, {
+          where: { id: screeningId },
+          lock: { mode: 'pessimistic_write' }
+        })
+
+        if (!screening) {
+          throw new NotFoundException(`Screening with id ${screeningId} not found`);
+        }
+
+        const attendance = await manager.findOne(Attendance, {
+          where: { screeningId, userId }
+        })
+
+        if (!attendance) {
+          throw new NotFoundException(`Attendance not found`);
+        }
+
+        const wasConfirmed = attendance.status === 'confirmed';
+        await manager.delete(Attendance, { id: attendance.id });
+
+        let promoted: Attendance | null;
+        let vacatedPosition: number | null = null;
+
+        if (wasConfirmed) {
+          const next = await manager.findOne(Attendance, {
+            where: { screeningId, status: 'waitlisted' },
+            order: { position: 'ASC' }
+          })
+
+          if (next) {
+            vacatedPosition = next.position;
+            next.status = 'confirmed';
+            next.position = null;
+            promoted = await manager.save(next);
+          }
+        } else {
+          vacatedPosition = attendance.position;
+        }
+
+        if (vacatedPosition !== null) {
+          await manager
+            .createQueryBuilder()
+            .update(Attendance)
+            .set({ position: () => 'position - 1' })
+            .where('screening_id = :screeningId', { screeningId })
+            .andWhere('status = :status', { status: 'waitlisted' })
+            .andWhere('position > :vacatedPosition', { vacatedPosition })
+            .execute();
+        }
+      }
+    )
+  }
 }
