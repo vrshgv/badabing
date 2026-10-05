@@ -5,6 +5,8 @@ import { ScreeningsModule } from './screenings/screenings.module';
 import { AttendancesModule } from './attendances/attendances.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './users/user.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -17,7 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       extra: { max: 10 }
     }),
     ScreeningsModule,
-    AttendancesModule
+    AttendancesModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

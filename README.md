@@ -1,4 +1,4 @@
-# badabing
+# badabing 🦆
 
 Post a movie night, take a seat, join the waitlist when it's full.
 
@@ -90,15 +90,3 @@ qb.andWhere('(s.startsAt, s.id) > (:startsAt, :id)', { startsAt, id });
 `id` is the tiebreaker, because two screenings can start at the same minute
 and a cursor sitting on that boundary would otherwise lose one. The cursor
 itself is base64url — opaque to clients, still readable when debugging.
-
-The page is fetched with `limit + 1`: if the extra row comes back there's a
-next page, which beats counting the whole future set to decide whether to
-show a "load more".
-
-One catch worth the migration it took: `toISOString()` only goes to
-milliseconds, while `timestamptz` stores microseconds. A cursor built from
-a trimmed timestamp compares as smaller than the row it came from, and that
-row gets served twice. `starts_at` is `timestamptz(3)` so the stored value
-and the cursor can't disagree.
-
-🦆
