@@ -15,6 +15,7 @@
     "dev:shared":   "npm run dev -w @badabing/shared",
     "dev:api":      "npm run start:dev -w @badabing/api",
     "dev:web":      "npm run dev -w @badabing/web",
-    "prepare":      "npm run build:shared"
+    "prepare":      "npm run build:shared",
+    "seed":         "npm run seed -w @badabing/api"
   }
 }
