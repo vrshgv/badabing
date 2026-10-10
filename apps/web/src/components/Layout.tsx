@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router';
+import { UserSwitcher } from './UserSwitcher';
 
 export function Layout() {
   return (
@@ -9,6 +10,7 @@ export function Layout() {
           <NavLink to="/screenings" end>Screenings</NavLink>
           <NavLink to="/screenings/new">New screening</NavLink>
         </nav>
+        <UserSwitcher />
       </header>
       <main>
         <Outlet />
