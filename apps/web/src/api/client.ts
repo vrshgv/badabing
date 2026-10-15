@@ -1,6 +1,8 @@
 import { ErrorCode, type ApiError } from '@badabing/shared';
 import type { z } from 'zod';
 
+type QueryParams = Record<string, string | number | boolean | undefined | null>;
+
 const BASE = '/api';
 
 export class ApiErrorException extends Error implements ApiError {
@@ -33,6 +35,18 @@ async function parseError(res: Response): Promise<ApiError> {
   }
 }
 
+function withQuery(path: string, params?: QueryParams) {
+  if (!params) return path;
+
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    qs.append(key, String(value));
+  }
+
+  return qs.size ? `${path}?${qs}` : path;
+}
+
 async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -52,14 +66,14 @@ async function requestNoContent(path: string, init?: RequestInit): Promise<void>
   if (!res.ok) throw new ApiErrorException(await parseError(res));
 }
 
-export function get<T>(path: string, schema: z.ZodType<T>) {
-  return request(path, schema)
+export function get<T>(path: string, schema: z.ZodType<T>, params?: QueryParams) {
+  return request(withQuery(path, params), schema);
 }
 
 export function post<T>(path: string, schema: z.ZodType<T>, body: unknown) {
-  return request(path, schema, { method: 'POST', body: JSON.stringify(body) })
+  return request(path, schema, { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function del(path: string) {
-  return requestNoContent(path, { method: 'DELETE' })
+  return requestNoContent(path, { method: 'DELETE' });
 }
